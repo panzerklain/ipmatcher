@@ -1,0 +1,29 @@
+name: general
+on:
+  release:
+    types:
+      - created
+jobs:
+  builder:
+    name: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - arch: linux_x86-64
+            artifact_name: ipmatcher_linux_x86-64
+            build_args: GOOS=linux GOARCH=amd64
+    steps:
+      - uses:  actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: Build
+        run: ${{ matrix.build_args }} go build -ldflags="-s -w" ipmatcher.go
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: target/release/${{ matrix.artifact_name }}
+          asset_name: ${{ matrix.artifact_name }}
+          tag: ${{ github.ref }}
