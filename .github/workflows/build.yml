@@ -1,0 +1,30 @@
+name: build
+on:
+  release:
+    types:
+      - created
+jobs:
+  builder:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      # linux_x64-86
+      - name: Build for linux_x64-86
+        run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o build_linux_x86-64/ipmatcher ipmatcher.go
+
+      - name: Archive asset for linux_x64-86
+        working-directory: ./build_linux_x86-64
+        run: tar cfz ipmatcher_linux_x86-64.tar.gz ipmatcher
+
+      - name: Upload binaries for linux_x64-86 to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./build_linux_x86-64/ipmatcher_linux_x86-64.tar.gz
+          asset_name: ipmatcher_linux_x86-64.tar.gz
+          tag: ${{ github.ref }}
