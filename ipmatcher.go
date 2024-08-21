@@ -11,7 +11,7 @@ func main() {
     ip_match := os.Args[1]
     filepath := os.Args[2]
 
-    // read whitelist subnets from file
+    // read file entries
 
     file, err := os.Open(filepath)
     if err != nil {
@@ -35,6 +35,9 @@ func main() {
     }
 
     for i, entry := range entries {
+        if len(entry) == 0 {
+            continue
+        }
         _, ipnet, err := net.ParseCIDR(entry)
         if err != nil {
             ipaddr := net.ParseIP(entry)
